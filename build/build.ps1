@@ -33,6 +33,15 @@ New-Item -ItemType Directory -Force $out | Out-Null
 & $vcpkg install "--x-manifest-root=$here" "--x-install-root=$installed" "--overlay-triplets=$(Join-Path $here 'triplets')" --triplet $triplet "--host-triplet=$hostTriplet"
 $lib = Join-Path $installed $triplet
 
+# Leptonica's CMake gives MinGW libraries a "-<version>.dll" suffix even when
+# static, while lept.pc asks for -lleptonica.
+$leptA = Join-Path $lib 'lib\libleptonica.a'
+if (-not (Test-Path $leptA)) {
+	$lept = Get-ChildItem (Join-Path $lib 'lib') -Filter 'libleptonica-*' | Select-Object -First 1
+	if (-not $lept) { throw "no libleptonica in $(Join-Path $lib 'lib'): $((Get-ChildItem (Join-Path $lib 'lib')).Name -join ', ')" }
+	Copy-Item $lept.FullName $leptA
+}
+
 # pkgconf resolves Tesseract's static link line.
 $tools = Join-Path $out 'vcpkg_tools'
 & $vcpkg install "pkgconf:$hostTriplet" "--x-install-root=$tools" --classic
