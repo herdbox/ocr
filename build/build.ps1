@@ -30,7 +30,7 @@ if (-not $env:VCPKG_ROOT) { throw 'set VCPKG_ROOT' }
 $vcpkg = Join-Path $env:VCPKG_ROOT 'vcpkg.exe'
 New-Item -ItemType Directory -Force $out | Out-Null
 
-& $vcpkg install "--x-manifest-root=$here" "--x-install-root=$installed" --triplet $triplet "--host-triplet=$hostTriplet"
+& $vcpkg install "--x-manifest-root=$here" "--x-install-root=$installed" "--overlay-triplets=$(Join-Path $here 'triplets')" --triplet $triplet "--host-triplet=$hostTriplet"
 $lib = Join-Path $installed $triplet
 
 # pkgconf resolves Tesseract's static link line.
