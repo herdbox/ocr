@@ -51,7 +51,8 @@ $env:CGO_ENABLED = '1'
 $env:CC = "$cpu-w64-mingw32-clang"
 $env:CXX = "$cpu-w64-mingw32-clang++"
 $env:CGO_CFLAGS = (& $pkgconf.FullName --cflags tesseract) -join ' '
-$env:CGO_LDFLAGS = ((& $pkgconf.FullName --static --libs tesseract) -join ' ') + ' -lc++ -static'
+# tesseract.pc leaves out Winsock, which its ScrollView client (svutil.cpp) needs.
+$env:CGO_LDFLAGS = ((& $pkgconf.FullName --static --libs tesseract) -join ' ') + ' -lws2_32 -lc++ -static'
 
 $models = Join-Path $out 'models'
 # Git for Windows' bash runs the same pinned download as on Linux.
