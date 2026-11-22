@@ -1,0 +1,2 @@
+# Fixtures are compared byte for byte; no CRLF conversion on Windows checkouts.
+testdata/** -text
