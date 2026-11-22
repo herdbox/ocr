@@ -1,0 +1,13 @@
+Data files in this package
+
+det.onnx
+  PP-OCRv5_mobile_det, from https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx
+  (commit e6f4fa85f00e168c862bc462aebca69eef9b3d3d), PaddlePaddle Authors.
+  Licensed under the Apache License, Version 2.0.
+
+tessdata/vie.traineddata
+  From https://github.com/tesseract-ocr/tessdata_best
+  (commit e12c65a915945e4c28e237a9b52bc4a8f39a0cec), Tesseract OCR authors.
+  Licensed under the Apache License, Version 2.0.
+
+The text of the Apache License, Version 2.0 is in tesseract.txt in this folder.

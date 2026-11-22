@@ -1,0 +1,40 @@
+# Linux build and test image for herdbox-ocr (glibc 2.35 floor).
+#   docker build -f Dockerfile.dev -t herdbox-ocr-dev .
+#   docker run --rm herdbox-ocr-dev
+# The package zip is left in /out.
+FROM ubuntu:22.04
+
+ARG GO_VERSION=1.27.3
+ARG VCPKG_COMMIT=93ad765c7b66ab9ce97469ec23a90b15c3a14ee5
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	build-essential git curl ca-certificates zip unzip tar pkg-config \
+	python3 python3-pip autoconf automake libtool nasm binutils \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& pip3 install --no-cache-dir cmake==3.31.6 ninja==1.11.1.4
+
+RUN arch=$(dpkg --print-architecture) \
+	&& curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz | tar -C /usr/local -xz
+ENV PATH=/usr/local/go/bin:$PATH
+
+ENV VCPKG_ROOT=/opt/vcpkg VCPKG_FORCE_SYSTEM_BINARIES=1 VCPKG_INSTALLED=/opt/vcpkg_installed
+RUN git clone https://github.com/microsoft/vcpkg.git $VCPKG_ROOT \
+	&& git -C $VCPKG_ROOT checkout $VCPKG_COMMIT \
+	&& $VCPKG_ROOT/bootstrap-vcpkg.sh -disableMetrics
+
+# Static Tesseract + Leptonica, in their own layer so code changes don't rebuild them.
+COPY build/vcpkg.json /tmp/manifest/vcpkg.json
+RUN triplet=$([ "$(dpkg --print-architecture)" = arm64 ] && echo arm64-linux || echo x64-linux) \
+	&& $VCPKG_ROOT/vcpkg install --x-manifest-root=/tmp/manifest --x-install-root=$VCPKG_INSTALLED --triplet $triplet \
+	&& rm -rf $VCPKG_ROOT/buildtrees $VCPKG_ROOT/downloads $VCPKG_ROOT/packages
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+ARG VERSION=0
+RUN OUT=/out VERSION=$VERSION build/build.sh
+
+ENV OUT=/out
+CMD ["build/test.sh"]
