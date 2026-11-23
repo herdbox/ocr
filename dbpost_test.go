@@ -50,6 +50,19 @@ func TestFROCR01_DetPostUnclip(t *testing.T) {
 	}
 }
 
+func TestFROCR01_DetPostTightLines(t *testing.T) {
+	// Cores 11 px tall, 9 px apart, as in a phone's compose box: unclip grows
+	// each by 7, so boxes stop halfway between lines instead of overlapping.
+	p := probMap(120, 100, 0.9, image.Rect(10, 20, 110, 31), image.Rect(10, 40, 110, 51), image.Rect(10, 60, 110, 71))
+	got := detBoxes(p, 120, 100)
+	if len(got) != 3 || got[1] != image.Rect(3, 36, 117, 56) {
+		t.Fatalf("%v", got)
+	}
+	if got[0].Max.Y != got[1].Min.Y || got[1].Max.Y != got[2].Min.Y || got[0].Min.Y != 13 || got[2].Max.Y != 78 {
+		t.Errorf("edges: %v", got)
+	}
+}
+
 func TestFROCR01_DetPostDiagonalConnected(t *testing.T) {
 	p := probMap(40, 40, 0.9, image.Rect(5, 5, 15, 15), image.Rect(15, 15, 25, 25))
 	if got := components(p, 40, 40); len(got) != 1 || got[0] != image.Rect(5, 5, 25, 25) {

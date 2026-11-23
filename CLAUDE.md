@@ -57,7 +57,7 @@ Pick the check that matches the change and report the numbers:
 
 | Change | Done when |
 | --- | --- |
-| `dbpost.go` / `det.go` / `tess.go` / preprocessing | Docker full check passes **and** you report `TestOCR_VietnameseSet` before vs. after. The baseline is 164/168 = 97.6 % and `SettingsFixture` 7/7. A drop is a regression, even if it stays ≥ 95 %. |
+| `dbpost.go` / `det.go` / `tess.go` / preprocessing | Docker full check passes **and** you report `TestOCR_VietnameseSet` before vs. after. The baseline is 169/173 = 97.7 % (synthetic 164/168, `real/` 5/5) and `SettingsFixture` 7/7. A drop is a regression, even if it stays ≥ 95 %. |
 | Pure post-processing logic | Add or adjust a `TestFROCR01_DetPost*` case, then run the Mac quick loop. |
 | `frame.go` / `main.go` | Docker full check passes, and the protocol is unchanged (or you've coordinated per *Contracts*). |
 | Build scripts / Dockerfile / pins | Docker full check passes. For Windows-only or CI-only edits, say they're unverified locally. |

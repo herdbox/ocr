@@ -8,7 +8,7 @@ Offline OCR for Android phone screenshots, packaged as one process you talk to o
 
 It finds text lines with the PP-OCRv5 mobile detection model on ONNX Runtime, then reads each line with Tesseract 5 and the `vie` model from tessdata_best. That covers Vietnamese with tone marks, and English. Chinese and other scripts are not supported.
 
-On our test set of 168 Vietnamese and English UI lines, 164 (97.6 %) come back exactly right. A 1080×2400 screenshot takes about 240 ms once warm, and the process peaks at about 310 MB of memory (linux/arm64, Docker).
+On our test set of 173 Vietnamese and English UI lines (12 synthetic screens and a real phone screenshot), 169 (97.7 %) come back exactly right. A 1080×2400 screenshot takes about 240 ms once warm, and the process peaks at about 310 MB of memory (linux/arm64, Docker).
 
 ## Install
 
@@ -154,7 +154,7 @@ You can send new requests without waiting for answers. Up to `min(CPUs, 4)` line
 ## How it works
 
 1. The region is resized so its long side is 960 px, and the PP-OCRv5 mobile det model turns it into a text probability map.
-2. A DB-style post-processor thresholds the map and collects connected regions. It drops small or low-scoring boxes, merges the boxes on one line and grows them back out. Boxes are axis-aligned, so rotated text is not handled.
+2. A DB-style post-processor thresholds the map and collects connected regions. It drops small or low-scoring boxes, merges the boxes on one line and grows them back out, stopping halfway to the lines above and below. Boxes are axis-aligned, so rotated text is not handled.
 3. Each line crop (plus 4 px of padding) goes to a Tesseract worker in single-line mode.
 
 Model files and the ONNX Runtime build are pinned by URL and sha256 in `build/`.

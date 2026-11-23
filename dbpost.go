@@ -28,13 +28,31 @@ func detBoxes(prob []float32, w, h int) []image.Rectangle {
 	}
 	boxes = mergeLines(boxes)
 	bounds := image.Rect(0, 0, w, h)
-	out := boxes[:0]
-	for _, b := range boxes {
-		if b = unclip(b).Intersect(bounds); !b.Empty() {
-			out = append(out, b)
+	var out []image.Rectangle
+	for i, b := range boxes {
+		if u := keepOff(unclip(b), b, boxes, i).Intersect(bounds); !u.Empty() {
+			out = append(out, u)
 		}
 	}
 	return out
+}
+
+// keepOff trims grown box u of line b (boxes[i]) to halfway between b and the
+// lines above and below it. Glyphs reach well past the shrunk text cores the
+// map shows, and with tight line spacing a crop holding a neighbour's accents
+// or descenders makes Tesseract read nothing or garbage.
+func keepOff(u, b image.Rectangle, boxes []image.Rectangle, i int) image.Rectangle {
+	for j, o := range boxes {
+		if j == i || o.Max.X <= u.Min.X || o.Min.X >= u.Max.X {
+			continue
+		}
+		if o.Min.Y >= b.Max.Y {
+			u.Max.Y = min(u.Max.Y, (b.Max.Y+o.Min.Y+1)/2)
+		} else if o.Max.Y <= b.Min.Y {
+			u.Min.Y = max(u.Min.Y, (o.Max.Y+b.Min.Y+1)/2)
+		}
+	}
+	return u
 }
 
 // components returns the bounding box of each 8-connected region above
